@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='lektor-rstfile',
-    description='Adds reStructuredText support to Lektor.',
+    description='Adds reStructuredText support to Lektor (as standalone files).',
     version='0.2',
     author=u'Amit Aronovitch',
     author_email='aronovitch@gmail.com',
