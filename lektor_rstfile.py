@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os.path
 from io import StringIO
 from lektor.context import get_ctx
 from lektor.pluginsystem import Plugin
@@ -102,24 +103,44 @@ class RstDescriptor(object):
         return Rst(self.source, self.extra_params, obj)
 
 
+_default_params = {
+    'doctitle_xform': False,
+    'initial_header_level': '2',
+    'syntax_highlight': 'short'}
+
+
 class RstType(Type):
     widget = 'multiline-text'
 
     def __init__(self, env, options):
         Type.__init__(self, env, options)
-        self.extra_params = {
-            'doctitle_xform': False,
-            'initial_header_level': '2',
-            'syntax_highlight': 'short'}
+        self.extra_params = _default_params
         self.extra_params.update(options)
 
     def value_from_raw(self, raw):
         return RstDescriptor(raw.value or u'', self.extra_params)
 
 
-class RstPlugin(Plugin):
-    name = "reStructuredText"
-    description = "Adds reStructuredText support"
+class RstFileType(Type):
+    widget = 'singleline-text'
+
+    def __init__(self, env, options):
+        Type.__init__(self, env, options)
+        self.extra_params = _default_params
+        self.extra_params.update(options)
+
+    def value_from_raw(self, raw):
+        path = os.path.join(
+            self.env.root_path, "content", *raw.value.split("/"))
+        rst = open(path).read().decode("utf-8")
+        return RstDescriptor(rst, self.extra_params)
+
+
+class RstFilePlugin(Plugin):
+    name = "reStructuredTextFile"
+    description = "Adds reStructuredText and reStructuredText-File support"
 
     def on_setup_env(self, **extra):
-        self.env.types['rst'] = RstType
+        self.env.types['rstfile'] = RstFileType
+        #Enable following line if you do not have lektor_rst installed
+        #self.env.types['rst'] = RstType
